@@ -1,5 +1,13 @@
-# Three.js Starter
-Courtesy of Bruno Simon of https://threejs-journey.xyz/
+# Portfolio
+
+This project is an interactive portfolio built with [Three.js](https://threejs.org) library. 
+
+It aims at gathering and showing all my skills while proposing an enjoyable experience. 
+
+All 3D models have been created with blender. 
+
+
+
 
 ## Setup
 Download [Node.js](https://nodejs.org/en/download/).
