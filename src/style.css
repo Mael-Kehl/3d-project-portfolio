@@ -28,7 +28,10 @@ canvas{
 button{
     height: 50px;
     width: 100px;
-    background-color: blue;
+    background: none;
+    color: rgb(206, 171, 161);
+    border-radius: 15%;
+    border: 2px solid rgb(206, 171, 161);
     z-index: 100;
     border: none;
 }
@@ -40,12 +43,16 @@ button{
     height: 100vh;
     width: 100vw;
     z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+
 }
 
 .buttons-container{
     display: flex;
     width: 200px;
-    height: 100px;
+    height: 500px;
     justify-content: center;
     align-items: center;
     transition: 1s ease;
