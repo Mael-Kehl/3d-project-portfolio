@@ -26,14 +26,13 @@ canvas{
 }
 
 button{
-    height: 50px;
-    width: 100px;
-    background: none;
-    color: rgb(206, 171, 161);
-    border-radius: 15%;
+    height: 45px;
+    width: 95px;
+    font-size: 20px;
+    border-radius: 10px;
+    background: rgb(206, 171, 161);
     border: 2px solid rgb(206, 171, 161);
     z-index: 100;
-    border: none;
 }
 
 .container{

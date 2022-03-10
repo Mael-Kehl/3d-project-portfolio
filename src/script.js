@@ -3,6 +3,7 @@ import * as THREE from 'three'
 //import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 //import * as dat from 'dat.gui'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
+import {MTLLoader, OBJLoader} from 'three-obj-mtl-loader'
 import gsap from 'gsap'
 
 // Debug
@@ -18,6 +19,8 @@ const pointerMove = new THREE.Vector2();
 
 let camera, renderer, scene, raycasterClick, raycasterMove;
 var sceneMeshes = [];
+let video, videoImage, videoImageContext, videoTexture;
+let right_screen;
 
 function init(){
     camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
@@ -28,9 +31,13 @@ function init(){
     renderer = new THREE.WebGLRenderer({
         canvas: canvas,
         alpha: true,
+        antialias: true
     })
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setClearColor(0xAAAAAA, 1.0);
+    //Enable shadows
+    renderer.shadowMap.enabled = true;
 
     raycasterClick = new THREE.Raycaster();
     raycasterMove = new THREE.Raycaster();
@@ -50,25 +57,81 @@ function fillScene(){
     //Camera 
     scene.add(camera)
 
+    //Scene skybox (background)
+
+    let skybox = new THREE.CubeTextureLoader().load( [
+        'px.jpg', 'nx.jpg',
+		'py.jpg', 'ny.jpg',
+		'pz.jpg', 'nz.jpg' 
+    ]);
+
+    scene.background = skybox;
+    
+    //Video mapped on right screen
+
+    video = document.createElement('video');
+	video.src = "text.mp4"
+	video.load();
+	video.loop=true;
+
+	videoImage = document.createElement('canvas');
+	videoImage.width = 1280;
+	videoImage.height = 720;
+	
+	videoImageContext = videoImage.getContext('2d');
+	videoImageContext.fillRect(0,0, videoImage.width, videoImage.height);
+	
+	videoTexture = new THREE.Texture(videoImage);
+
+    /*
     // Point lumineux
     const light = new THREE.PointLight(0xFFFFFF, 1.8);
     light.position.set(3 , 37, 0);
-    /*
-    const light2 = new THREE.DirectionalLight(0xFFFFFF, 1.0);
-    light2.position.set(-500, 250, -200);
     */
-    scene.add(light)
 
+    
+    //Directional light with helper
+    /*
+    const light = new THREE.DirectionalLight( 0xFFFFFF, 2.0 );
+    light.position.set(5,10,0);
+    const helper = new THREE.DirectionalLightHelper( light, 10, 0xff0000 );
+    scene.add(light);
+    scene.add( helper );
+    */
+
+    
+    let spotLight = new THREE.SpotLight( 0xffffff, 2 );
+    spotLight.position.set(5,10,0);
+    spotLight.angle = 30 * Math.PI / 180;
+	spotLight.exponent = 1.2;
+    spotLight.penumbra = 1.0;
+    spotLight.target.position.set(0,2,0);
+
+    scene.add(spotLight);
+    scene.add(spotLight.target)
+
+    const spotLightHelper = new THREE.SpotLightHelper( spotLight );
+    scene.add( spotLightHelper );
+    
+    right_screen = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.4, 0.7),
+        new THREE.MeshBasicMaterial({map: videoTexture})
+    )
+    right_screen.position.set(-0.77, 4.64, -0.63);
+    right_screen.rotation.y = 18 * Math.PI/180;
+    right_screen.visible = false;
+    scene.add(right_screen);
+    
     /**
      * We are loading all the models we need part by part
      * Instead of using messy blender's id and names to differenciate them, 
      * We create the userData.id field that is way more simple to use
      * Each element is loaded IN the previous one, that way we can all animate them
      * simultaneously when they're all loaded 
-     */
+    */
     gltfLoader.load('desk.gltf', (desk) => {
         
-        addToMeshes(desk, 0);
+        addGLTFToMeshes(desk, 0);
 
         desk.scene.scale.set(0.1,0.1,0.1)
         desk.scene.position.y += 2;
@@ -80,7 +143,7 @@ function fillScene(){
         //Loading left screen's gltf model
         gltfLoader.load('screen1mesh.gltf', (leftscreen) => {
 
-            addToMeshes(leftscreen, 1);
+            addGLTFToMeshes(leftscreen, 1);
 
             leftscreen.scene.scale.set(0.1,0.1,0.1)
             leftscreen.scene.position.y += 2;
@@ -90,74 +153,137 @@ function fillScene(){
             //Loading right screen's gltf model
             gltfLoader.load('screen2mesh.gltf', (rightscreen) => {
 
-                addToMeshes(rightscreen, 2);
+                addGLTFToMeshes(rightscreen, 2);
 
                 rightscreen.scene.scale.set(0.1,0.1,0.1)
                 rightscreen.scene.position.y += 2;
 
                 scene.add(rightscreen.scene)
                 sceneMeshes.push(rightscreen.scene)
-                            //Loading the phone
-                gltfLoader.load('phone.gltf', (phone) => {
 
-                    addToMeshes(phone, 3);
-        
-                    phone.scene.scale.set(0.1,0.1,0.1)
-                    phone.scene.position.y += 2;
-                    phone.scene.rotation.y = -90*Math.PI/180;
-                    phone.scene.position.x += 0.1;
-        
-        
-                    scene.add(phone.scene);
+                //Loading the notebook
+                gltfLoader.load('notebook.gltf', (notebook) => {
 
+                    addGLTFToMeshes(notebook, 4);
+        
+                    notebook.scene.scale.set(0.1,0.1,0.1)
+                    notebook.scene.position.y += 2;
+                    notebook.scene.rotation.y = -90*Math.PI/180;
+                    notebook.scene.position.x += 0.1;
+        
+                    scene.add(notebook.scene);
                     
-                    //Loading the notebook
-                    gltfLoader.load('notebook.gltf', (notebook) => {
+                    gltfLoader.load('phone1.gltf', (phone) => {
 
-                        addToMeshes(notebook, 4);
+                        addGLTFToMeshes(phone, 3);
             
-                        notebook.scene.scale.set(0.1,0.1,0.1)
-                        notebook.scene.position.y += 2;
-                        notebook.scene.rotation.y = -90*Math.PI/180;
-                        notebook.scene.position.x += 0.1;
+                        phone.scene.scale.set(0.1,0.1,0.1)
+                        phone.scene.position.y += 3.95;
+                        phone.scene.rotation.y = -90*Math.PI/180;
+                        phone.scene.rotation.z = 90*Math.PI/180;
+                        phone.scene.position.x += 1.2;
             
-            
-                        scene.add(notebook.scene);
-                        
-                        gltfLoader.load('droid.gltf', (droid) => {
+                        scene.add(phone.scene);
 
-                            addToMeshes(droid, 5);
+                        gltfLoader.load('poe.gltf', (poe) => {
+
+                            addGLTFToMeshes(poe, 5);
                 
-                            droid.scene.scale.set(0.1,0.1,0.1)
-                            droid.scene.position.y += 2;
-                            droid.scene.rotation.y = -90*Math.PI/180;
-                            droid.scene.position.x += 0.1;
+                            poe.scene.scale.set(0.4,0.4,0.4)
+                            poe.scene.position.y += 3.95;
+                            poe.scene.position.x += 2.4;
+                            poe.scene.rotation.y -= 45 * Math.PI/180;
+
                 
-                            scene.add(droid.scene);
-                            
+                            scene.add(poe.scene);
+                                
                             //Animating the 6 elements at the same time
                             gsap.to(desk.scene.rotation, {y: 4.8, duration: 1})
                             gsap.to(leftscreen.scene.rotation, {y: 4.8, duration: 1})
                             gsap.to(rightscreen.scene.rotation, {y: 4.8, duration: 1})
-                            gsap.to(phone.scene.rotation, {y: 4.8, duration: 1})
                             gsap.to(notebook.scene.rotation, {y: 4.8, duration: 1})
-                            gsap.to(droid.scene.rotation, {y: 4.8, duration: 1})
+                            gsap.to(phone.scene.rotation, {y: 4.8, duration: 1})
+                            gsap.to(poe.scene.rotation, {y: 4.8, duration: 1})
+                            
 
-                        }) // Droid end
-                    }) //Notebook end 
-                }) //Phone end 
+                        }) //Poe end
+                    }) //Phone end 
+                }) //Notebook end 
             }) //Right screen end 
         }) //Left screen end 
     }) //Desk end 
+
+    let phoneMat = new THREE.MeshPhysicalMaterial({
+		roughness: 0.1,
+		metalness: 0.5, 
+		reflectivity: 1,
+		clearcoat: 1,
+		clearcoatRoughness: 0,
+	})
+
+    /*
+    let objLoader = new OBJLoader();    
+
+	objLoader.load("phone1.obj", (phone) => {    
+		phone.scale.set(0.1,0.1,0.1);
+        
+        phone.position.y += 3.95;
+        phone.rotation.y = 90*Math.PI/180;
+        phone.position.x += 1.2;
+        phone.position.z += 0.2;
+        
+
+		phone.traverse(function(child){
+			if (child instanceof THREE.Mesh){
+                child.material = phoneMat;
+			}
+		})
+        addObjToMeshes(phone, 3);
+
+        scene.add(phone);
+
+        gsap.to(phone.rotation, {y: 4.8, duration: 1})
+
+	}); // End Obj Loader phone
+    
+    let poeobjLoader = new OBJLoader();
+    let poemtlLoader = new MTLLoader();
+
+    poemtlLoader.load("poe.mtl", (poeMat) => {
+        poeMat.preload();
+        poeobjLoader.setMaterials(poeMat);
+        poeobjLoader.load("poe.obj", function(poe)
+        {    
+            poe.position.set(2.6 ,3.95, -0.6);
+            poe.scale.set(0.4, 0.4, 0.4);
+
+            addObjToMeshes(poe, 5);
+            
+            scene.add(poe);
+
+            gsap.to(poe.rotation, {y: 4.8, duration: 1})
+        }); //End MTL Loader poe
+    }); //End MTL Loader poe
+
+    const fontLoader = new THREE.FontLoader();
+    fontLoader.load("inter_medium.json", function (font){
+        const geometry = new THREE.TextGeometry("Hi \n I'm Maël, \n an IT Student", {
+            font: font, 
+            size: 1,
+            height: 1 
+        })
+
+        const textMesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(0xffffff))
+
+        textMesh.scale.set(0.1,0.1,0.1);
+        textMesh.position.set(-1.4, 4.8, -0.5);
+        textMesh.rotation.y = 20 * Math.PI/180;
+    
+        scene.add(textMesh);
+    });
+    */
     console.log(sceneMeshes);
 
-    const cube = new THREE.Mesh(
-        new THREE.BoxGeometry(5,5,5),
-        new THREE.MeshStandardMaterial({color: 0xff0000})
-    );
-    cube.position.set(0,0,0);
-    cube.scale.set(0.1,0.1,0.1);
-    scene.add(cube);
 }
 
 
@@ -168,8 +294,27 @@ function fillScene(){
  * @param {Object that we check} element 
  * @param {Object userData id} id 
  */
-function addToMeshes(element, id){
+function addGLTFToMeshes(element, id){
     element.scene.traverse(function (child) {
+        if (child.isMesh) {
+            let m = child;
+            m.userData.id = id;
+            m.receiveShadow = true;
+            m.castShadow = true;
+            sceneMeshes.push(m);
+        }
+    })
+}
+
+/**
+ * Checks is an element is a mesh, if so we add it to sceneMeshes
+ * we assign it a new id given in parameter
+ * This id is given in userData, this allows us to control it easily
+ * @param {Object that we check} element 
+ * @param {Object userData id} id 
+ */
+ function addToMeshes(element, id){
+    element.traverse(function (child) {
         if (child.isMesh) {
             let m = child;
             m.userData.id = id;
@@ -202,15 +347,21 @@ function onPointerMove( event ) {
     if (intersectsMove.length > 0) {
         
         /** Left screen hover effect */
-        if ( intersectsMove[0].object.userData.id == 1 ) hoverZtranslate(1, 0.05);
-        else hoverZtranslate(1, 0.0);
+        if ( intersectsMove[0].object.userData.id == 1 ){
+            hoverZtranslate(1, 0.05);
+            gsap.to(right_screen.position, {y: 4.69, duration: 0.5})
+        } 
+        else{
+            hoverZtranslate(1, 0.0);
+            gsap.to(right_screen.position, {y: 4.64, duration: 0.5})
 
+        }
         /** Right screen hover effect */
         if ( intersectsMove[0].object.userData.id == 2 ) hoverZtranslate(2, 0.05);
         else hoverZtranslate(2, 0.0);
         
         /** Phone hover effect */
-        if ( intersectsMove[0].object.userData.id == 3 ) hoverZtranslate(3, 0.05);
+        if ( intersectsMove[0].object.userData.id == 3 ) hoverZtranslate(3, 0.4);
         else hoverZtranslate(3, 0.0);
 
         /** Notebook hover effect */
@@ -266,6 +417,9 @@ function onDocumentMouseDown( event ) {
                 gsap.to(camera.position, {z: -0.15,y: 4.63,x:-0.5, duration: 1});
                 gsap.to(camera.rotation, {x: 0, y:0.3, duration: 1});
                 hoverZtranslate(1 , 0.0);
+                gsap.to(right_screen.position, {y: 4.64, duration: 0.5})
+                right_screen.visible = true;
+	            video.play();
                 zoomedScreenLeft = true;
             }
             //If we already zoomed in, we zoom out
@@ -416,6 +570,13 @@ const clock = new THREE.Clock()
 //Animating the scene
 const animate = () =>
 {
+    if( video.readyState === video.HAVE_ENOUGH_DATA)
+	{
+		videoImageContext.drawImage(video, 0,0);
+		if (videoTexture) {
+			videoTexture.needsUpdate = true;
+		}
+	}
     render();
     window.requestAnimationFrame(animate)
 }
