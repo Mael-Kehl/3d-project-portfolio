@@ -69,14 +69,7 @@ h1{
     color:#fff;
 }
 
-.intro-container{
-    display: none;
-    position: relative;
-    top: 10%;
-    left: 12%;
-    height: 10%;
-    width: 50%;
-}
+
 
 .intro{
     position: absolute;

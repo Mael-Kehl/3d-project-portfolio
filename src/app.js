@@ -1,3 +1,4 @@
+/*
 //Recovering helloworld div
 const helloworld = document.getElementById("helloworld");
 
@@ -56,3 +57,4 @@ function type(){
     setTimeout(type, 200);
 };
 
+*/
