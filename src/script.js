@@ -1,31 +1,37 @@
 import './style.css'
 import * as THREE from 'three'
 //import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-//import * as dat from 'dat.gui'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import {MTLLoader, OBJLoader} from 'three-obj-mtl-loader'
 import gsap from 'gsap'
 
-// Debug
-//const gui = new dat.GUI()
 
-// Canvas
+// Recovering elements from DOM
 const canvas = document.querySelector('canvas.webgl');
+const startButton = document.getElementById("next");
+const backButton = document.getElementById("back");
+
+// Loaders
 const gltfLoader = new GLTFLoader();
+const fontLoader = new THREE.FontLoader();
+
+//Creating vectors we'll need
 const pointerClick = new THREE.Vector2();
 const pointerMove = new THREE.Vector2();
+const initCameraPos  = new THREE.Vector3( 0, 5, 2 ); 
+const initCameraRota = new THREE.Vector3( -0.5, 0, 0 );
+
 
 // Scene
-let camera, renderer, scene, raycasterClick, raycasterMove;
+let camera, renderer, scene, raycasterClick, raycasterMove, text_resume, text_SW;
 //All meshes in the scene
 var sceneMeshes = [];
 //All variables needed to load the right screen videoTexture
 let video, videoImage, videoImageContext, videoTexture;
 //element of the scene that (modified in animate())
-let right_screen, dirLight;
+let left_screen_content, dirLight;
 let factor;
 
-let zoomedScreenLeft = false ,zoomedScreenRight = false, zoomedPilot = false, zoomedPhone = false;
+let zoomedScreenLeft = false ,zoomedScreenRight = false, zoomedPilot = false, zoomedPhone = false, zoomedDesk = false;
 
 
 function init(){
@@ -46,9 +52,8 @@ function init(){
 
     raycasterClick = new THREE.Raycaster();
     raycasterMove = new THREE.Raycaster();
-
     factor = 0;
-
+    
     //We call the function onDocumentMouseDown at every click (mousedown) event
     document.addEventListener( 'mousedown', onDocumentMouseDown );
     //We call the function onPointerMove at every movement of the mouse
@@ -87,19 +92,46 @@ function fillScene(){
 
     scene.add(dirLight);
     
-    right_screen = new THREE.Mesh(
-        new THREE.PlaneGeometry(1.4, 0.7),
+    left_screen_content = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.4, 0.75),
         new THREE.MeshBasicMaterial({map: videoTexture})
     )
-    right_screen.position.set(-0.77, 4.64, -0.63);
-    right_screen.rotation.y = 18 * Math.PI/180;
-    right_screen.visible = false;
-    scene.add(right_screen);
+    left_screen_content.position.set(-0.77, 4.635, -0.63);
+    left_screen_content.rotation.y = 18 * Math.PI/180;
+    left_screen_content.visible = false;
+    scene.add(left_screen_content);
     
     loadModels();
 
     console.log(sceneMeshes);
 
+    fontLoader.load("inter_medium.json", function (font){
+        const geometry1 = new THREE.TextGeometry("resume download", {
+            font: font, 
+            size: 1,
+            height: 1 
+        })
+        text_resume = new THREE.Mesh(geometry1, new THREE.MeshBasicMaterial({color: 0xCCCCCC}))
+        text_resume.scale.set(0.07,0.07,0.02);
+        text_resume.position.set(-2.2, 4.1, 0.1);
+        text_resume.rotation.y = 35 * Math.PI/180;
+    
+        scene.add(text_resume);
+        text_resume.visible = false;
+
+        const geometry2 = new THREE.TextGeometry("I've been an avid \nStar Wars fan  \nsince I was a kid. \nTherefore, my projects \nwill take you to \nanother dimension. ", {
+            font: font, 
+            size: 1,
+            height: 1 
+        })
+        text_SW = new THREE.Mesh(geometry2, new THREE.MeshBasicMaterial({color: 0xCCCCCC}))
+        text_SW.scale.set(0.07,0.07,0.02);
+        text_SW.position.set( 2.7, 4.7, - 1.4);
+        text_SW.rotation.y = - 35 * Math.PI/180;
+    
+        scene.add(text_SW);
+        text_SW.visible = false;
+    });
 }
 
 function createVideoTexture(){
@@ -218,6 +250,41 @@ function addGLTFToMeshes(element, id){
 }
 
 /**
+ * Translates an object on z axis (vertical)
+ * @param {id of the object} id 
+ * @param {value to translate} z 
+ */
+ function hoverZtranslate(id, z){
+    sceneMeshes.forEach(mesh => {
+        if (mesh.userData.id == id) {
+            gsap.to(mesh.position, {z:z, duration: 0.5})
+        }
+    });
+}
+
+
+/**
+ * Translates an object on z axis (vertical)
+ * @param {id of the object} id 
+ * @param {value to translate} z 
+ */
+ function hoverYtranslate(id, y){
+    sceneMeshes.forEach(mesh => {
+        if (mesh.userData.id == id) {
+            gsap.to(mesh.position, {y:y, duration: 0.5})
+        }
+    });
+}
+
+/**
+ * Puts the camera to its initial position
+ */
+function cameraIntialPosition(){
+    gsap.to(camera.rotation, {x: initCameraRota.x , y: initCameraRota.y , duration: 1});
+    gsap.to(camera.position, {x: initCameraPos.x , y: initCameraPos.y , z: initCameraPos.z , duration: 1});
+}
+
+/**
  * Everytime that the pointer moves, we check if it's on a object
  * @param {Pointer moving event} event 
  */
@@ -236,60 +303,44 @@ function onPointerMove( event ) {
     if (intersectsMove.length > 0) {
         
         /** Left screen hover effect */
-        if ( intersectsMove[0].object.userData.id == 1 ){
+        if ( intersectsMove[0].object.userData.id == 1 && !zoomedScreenLeft){
             hoverZtranslate(1, 0.05);
-            gsap.to(right_screen.position, {y: 4.69, duration: 0.5})
+            gsap.to(left_screen_content.position, {y: 4.69, duration: 0.5})
         } 
-        else{
+        else if (!zoomedScreenLeft) {
             hoverZtranslate(1, 0.0);
-            gsap.to(right_screen.position, {y: 4.64, duration: 0.5})
+            gsap.to(left_screen_content.position, {y: 4.64, duration: 0.5})
 
         }
         /** Right screen hover effect */
-        if ( intersectsMove[0].object.userData.id == 2 ) hoverZtranslate(2, 0.05);
-        else hoverZtranslate(2, 0.0);
+        if ( intersectsMove[0].object.userData.id == 2 && !zoomedScreenRight ) hoverZtranslate(2, 0.05);
+        else if (!zoomedScreenRight) hoverZtranslate(2, 0.0);
+
+         /** Phone hover effect */
+         if ( intersectsMove[0].object.userData.id == 3 && !zoomedPhone) hoverYtranslate(3, 0.15);
+         else if (!zoomedPhone) hoverYtranslate(3, 0.0);
 
         /** Notebook hover effect */
-        if ( intersectsMove[0].object.userData.id == 4 ) hoverZtranslate(4, 0.05);
-        else hoverZtranslate(4, 0.0);
+        if ( intersectsMove[0].object.userData.id == 4) {
+            hoverZtranslate(4, 0.05);
+            gsap.to(text_resume, {visible: true, duration: 0.5});
+        }
+        else{
+            hoverZtranslate(4, 0.0);
+            gsap.to(text_resume, {visible: false, duration: 0.1});
+        }
 
-        /** Rebel pilot hover effect
-        if ( intersectsMove[0].object.userData.id == 5 ) hoverZtranslate(5, 0.05);
+        //Rebel pilot hover effect
+        if ( intersectsMove[0].object.userData.id == 5 ) hoverZtranslate(5, -0.1);
         else hoverZtranslate(5, 0.0);
-        */
+        
     }
-}
-
-/**
- * Translates an object on z axis (vertical)
- * @param {id of the object} id 
- * @param {value to translate} z 
- */
-function hoverZtranslate(id, z){
-    sceneMeshes.forEach(mesh => {
-        if (mesh.userData.id == id) {
-            gsap.to(mesh.position, {z:z, duration: 0.5})
-        }
-    });
-}
-
-/**
- * Translates an object on z axis (vertical)
- * @param {id of the object} id 
- * @param {value to translate} z 
- */
- function hoverYtranslate(id, y){
-    sceneMeshes.forEach(mesh => {
-        if (mesh.userData.id == id) {
-            gsap.to(mesh.position, {y:y, duration: 0.5})
-        }
-    });
 }
 
 function onDocumentMouseDown( event ) {
     pointerClick.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     pointerClick.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    // Debug : console.log(pointer.x, pointer.y)
+
 
     raycasterClick.setFromCamera(pointerClick, camera);
     const intersects = raycasterClick.intersectObjects( sceneMeshes );
@@ -302,13 +353,12 @@ function onDocumentMouseDown( event ) {
                 gsap.to(camera.position, {z: -0.15,y: 4.63,x:-0.5, duration: 1});
                 gsap.to(camera.rotation, {x: 0, y:0.3, duration: 1});
                 hoverZtranslate(1 , 0.0);
-                gsap.to(right_screen.position, {y: 4.64, duration: 0.5})
+                gsap.to(left_screen_content.position, {y: 4.64, duration: 0.5})
                 zoomedScreenLeft = true;
             }
             //If we already zoomed in, we zoom out
             else{
-                gsap.to(camera.rotation, {x: -0.5, y:0, duration: 1});
-                gsap.to(camera.position, {z: 2,y: 5,x:0, duration: 1});
+                cameraIntialPosition();
                 zoomedScreenLeft = false;
             }
         }
@@ -324,21 +374,20 @@ function onDocumentMouseDown( event ) {
             }
             //If we already zoomed in, we zoom out
             else {
-                gsap.to(camera.rotation, {x: -0.5, y:0, duration: 1});
-                gsap.to(camera.position, {z: 2,y: 5,x:0, duration: 1});
+                cameraIntialPosition();
                 zoomedScreenRight = false;
             }
         }
         else if (intersects[0].object.userData.id == 3) { //Phone
             if (!zoomedPhone) {
-                hoverZtranslate(3, 0.0);
+                hoverYtranslate(3, 0.0)
 
                 sceneMeshes.forEach(mesh => {
                     if (mesh.userData.id == 3) {
                         gsap.to(mesh.position, {y: 60, duration: 1});
-                        gsap.to(mesh.rotation, {z: -90*Math.PI/180, y: 220*Math.PI/180, duration: 1}); //panim
-                        gsap.to(camera.position, {z: 0.5,y: 10.15,x:1.5, duration: 1});
-                        gsap.to(camera.rotation, {y: 0, x:-0.5, duration: 1});
+                        gsap.to(mesh.rotation, {z: -90*Math.PI/180, y: Math.PI, duration: 1}); //panim
+                        gsap.to(camera.position, {z: 0.3,y: 10.12,x:1.25, duration: 1});
+                        gsap.to(camera.rotation, {x: initCameraRota.x , y: initCameraRota.y , duration: 1});
                     }
                     //We replace the phone's screen texture by a png loaded before
                     //We recognize it by it's name, we need to be sure that no other element has that name
@@ -352,10 +401,9 @@ function onDocumentMouseDown( event ) {
             else{
                 sceneMeshes.forEach(mesh => {
                     if (mesh.userData.id == 3) {
+                        gsap.to(mesh.rotation, {z: Math.PI, y: -Math.PI, duration: 1});
                         gsap.to(mesh.position, {y: 0, duration: 1});
-                        gsap.to(mesh.rotation, {z: 0, y: 0, duration: 1});
-                        gsap.to(camera.position, {z: 2,y: 5,x:0, duration: 1});
-                        gsap.to(camera.rotation, {y: 0, x:-0.5, duration: 1});
+                        cameraIntialPosition();
                     }
                 });
                 zoomedPhone = false;
@@ -367,15 +415,14 @@ function onDocumentMouseDown( event ) {
         else if (intersects[0].object.userData.id == 5){ //Pilot
             if (!zoomedPilot) {
                 hoverZtranslate(5 , 0.0);
-                gsap.to(camera.position, {z: 0,y: 4.6,x:2, duration: 1});
+                gsap.to(camera.position, {z: -0.1,y: 4.4,x:2.2, duration: 1});
                 gsap.to(camera.rotation, {y: -0.4, x:0, duration: 1});
-
+                gsap.to(text_SW, {visible: true, duration: 0.5});
                 zoomedPilot = true;
             }
             else {
-                gsap.to(camera.position, {z: 2,y: 5,x:0, duration: 1});
-                gsap.to(camera.rotation, {y: 0, x:-0.5, duration: 1});
-
+                cameraIntialPosition();
+                gsap.to(text_SW, {visible: false, duration: 0.5});
                 zoomedPilot = false;
             }
         }
@@ -393,44 +440,35 @@ function download() {
     return false;
 }
 
-const nextbutton = document.getElementById("next");
-const backbutton = document.getElementById("back");
-
-let count = 0
-
-nextbutton.addEventListener('click', (e) => {
-
-    switch (count) {
-        case 0: //Approch the desktop
-        {
-            gsap.to(camera.position, {z: 2,y: 5, duration: 1});
-            gsap.to(camera.rotation, {x: -0.5, duration: 1});
-            backbutton.style.display = "block";
-            nextbutton.textContent = "Continue";
-            right_screen.visible = true;
-            video.play();
-            break;
-        }      
-        default:
-            break;
-    }
-    count++;
+startButton.addEventListener('click', (e) => {
+    zoomedDesk = true;
+    cameraIntialPosition();
+    backButton.style.display = "block";
+    startButton.style.display = "none";
+    left_screen_content.visible = true;
+    video.play();
 })
 
-backbutton.addEventListener('click', (e) => {
-    switch (count) {
-        case 1: //On s'approche du bureau
-        {
-            gsap.to(camera.rotation, {x: 0, duration: 1});
-            gsap.to(camera.position, {z: 8,y: 4, duration: 1});
-            backbutton.style.display = "none";
-            nextbutton.textContent = "Start"
-            break;
-        }    
-        default:
-            break;
+backButton.addEventListener('click', (e) => {
+
+    if (zoomedPhone) {
+        sceneMeshes.forEach(mesh => {
+            if (mesh.userData.id == 3) {
+                gsap.to(mesh.rotation, {z: Math.PI, y: -Math.PI, duration: 1});
+                gsap.to(mesh.position, {y: 0, duration: 1});
+                cameraIntialPosition();
+            }
+        });
+        zoomedPhone = false;
     }
-    count--;
+    else if (zoomedPilot) {
+        cameraIntialPosition();
+        gsap.to(text_SW, {visible: false, duration: 0.5});
+        zoomedPilot = false;
+    }
+    else if ( zoomedScreenLeft || zoomedScreenRight){
+        cameraIntialPosition();
+    }
 })
 
 
@@ -457,9 +495,6 @@ window.addEventListener('resize', () =>
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
-
-
-const clock = new THREE.Clock()
 
 //Animating the scene
 const animate = () =>

@@ -19,7 +19,15 @@ module.exports = {
             ]
         }),
         new HtmlWebpackPlugin({
+            filename: 'index.html',
             template: path.resolve(__dirname, '../src/index.html'),
+            chunks: ['main'],
+            minify: true
+        }),
+        new HtmlWebpackPlugin({
+            filename: 'menu.html',
+            template: path.resolve(__dirname, '../src/menu.html'),
+            chunks: ['menu'],
             minify: true
         }),
         new MiniCSSExtractPlugin()
