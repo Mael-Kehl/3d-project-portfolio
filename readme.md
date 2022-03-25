@@ -4,7 +4,9 @@ This project is an interactive portfolio built with the [Three.js](https://three
 
 It aims at gathering and showing all my skills while proposing an enjoyable experience. 
 
-All 3D models have been created with blender. 
+I am using [GSAP](https://greensock.com/gsap/) for all the animations, [NPM](https://www.npmjs.com/) fo the dependencies and the bundler [Webpack](https://webpack.js.org/). 
+
+All 3D models have been created with [Blender](https://www.blender.org/).
 
 
 
