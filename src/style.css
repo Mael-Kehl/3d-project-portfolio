@@ -2,15 +2,21 @@
 {
     margin: 0;
     padding: 0;
+    text-decoration: none;
+}
+
+a{
+    color: #40474B;
 }
 
 html,
 body
 {
     position: relative;
-    background: #2a2a2a;
+    background: #F3F1E5;
+    color: #40474B;
     height: 100vh;
-    font-family: 'Poppins';
+    font-family: 'Inter', sans-serif;
 }
 
 .webgl
@@ -25,7 +31,7 @@ canvas{
     z-index: 1;
 }
 
-button{
+.scene-buttons{
     height: 45px;
     width: 95px;
     font-size: 20px;
@@ -35,7 +41,7 @@ button{
     z-index: 100;
 }
 
-.container{
+.scene-container{
     position: absolute;
     top: 0;
     left: 0;
@@ -61,51 +67,171 @@ button{
     display: none;
 }
 
-h1{
-    color: #fff;
+
+/* Menu Css */
+
+.container{
+    height: 100vh;
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
 }
 
-#helloworld{
-    color:#fff;
-}
-
-
-
-.intro{
-    position: absolute;
+section{
+    height: 100vh;
     display: flex;
-    height: 100%;
-    width: 100%;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    scroll-snap-align: start;
 }
 
-.typing{
-    position: relative;
+.blue-text{
+    color: #00A2FF;
+}
+
+.menu{
+    height: 3vh;
+    width: 100vw;
+    display: flex;
+    justify-content: flex-end;
+}
+
+#menu-button{
+    width: 50px;
+    background: none;
+    border: none;
+}
+
+.central-elements{
+    height: 85vh;
+    width: 80vw;
+}
+
+#dev-name{
+    height: 8vh;
+    width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+}
+
+.page-title{
+    height: 55vh;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 48px;
+    letter-spacing: 0.05em;
+}
+
+.scroll-down{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 8vh;
+    width: 170px;
+    font-size: 14px;
+}
+
+#contact-title{
+    height: 40vh;
+}
+
+#project-title{
+    height: 10vh;
+}
+
+.social-links{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 25vh;
+}
+
+.social-link{
+    width: 110px;
+    display: flex;
+    align-items: center;
+}
+
+.social-name{
     margin-left: 10px;
 }
 
-.typing:after{
-    content: "";
-    position: absolute;
-    width: 1px;
+.carousel{
+    overflow: hidden;
+    height: 400px;
+    width: 100%;
+    border-radius: 5%;
+    border: solid 3px #40474B;
+}
+
+.carousel:hover{
+    cursor: grab;
+}
+
+.slider{
+    height: 400px;
+    width: 100%;
+    display: inline-flex;
+    transform: translateX(0);
+    transition: transform 0.3s ease-out;
+}
+
+.slide{
+    min-height: 400px;
+    max-height: 400px;
+    max-width: 79vw;
+    min-width: 79vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.slide>h4{  
+    width: 90%;
+    letter-spacing: 0.05em;
+    text-align: justify;
+}
+
+.slide>svg{
+    width: 45%;
     height: 40%;
-    border-right: 3px solid white;
-    animation: blink 0.7s ease infinite;
 }
 
-@keyframes blink{
-    0%{
-        opacity: 0;
-    }
-    100%{
-        opacity: 1;
-    }
+.arrow-container{
+    height: 50px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 }
 
-span{
-    opacity: 0;
-    transition: all 0.6s ease;
+#swipe-instruction{
+    width: 100%;
+    text-align: center;
 }
 
-span.fade{
-    opacity: 1;
+.grabbing{
+    cursor: grabbing;
+}
+
+.find-out-more-link{
+    height: 15%;
+    width: 70%;
+}
+
+.find-out-more-button{
+    height: 100%;
+    width: 100%;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    background: #00A2FF;
+    border: 2px solid #00A2FF;
+    color: #F3F1E5;
+    z-index: 100;
 }

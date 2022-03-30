@@ -14,12 +14,20 @@ const backButton = document.getElementById("back");
 const gltfLoader = new GLTFLoader();
 const fontLoader = new THREE.FontLoader();
 
-//Creating vectors we'll need
+//Creating vectors used with raycaster
 const pointerClick = new THREE.Vector2();
 const pointerMove = new THREE.Vector2();
+
+//All objects' intial positions, scales and rotations
 const initCameraPos  = new THREE.Vector3( 0, 5, 2 ); 
 const initCameraRota = new THREE.Vector3( -0.5, 0, 0 );
 
+const gltfBasicPos = new THREE.Vector3(0,2,0);
+const plantPos = new THREE.Vector3(-2.2, 3.75,-0.5);
+const notebookPos = new THREE.Vector3(0.1, 2, 0);
+const phonePos = new THREE.Vector3(1.2, 3.95, 0);
+
+const gltfScale = 0.1;
 
 // Scene
 let camera, renderer, scene, raycasterClick, raycasterMove, text_resume, text_SW;
@@ -28,7 +36,7 @@ var sceneMeshes = [];
 //All variables needed to load the right screen videoTexture
 let video, videoImage, videoImageContext, videoTexture;
 //element of the scene that (modified in animate())
-let left_screen_content, dirLight;
+let left_screen_content, dirLight, dirLight2;
 let factor;
 
 let zoomedScreenLeft = false ,zoomedScreenRight = false, zoomedPilot = false, zoomedPhone = false, zoomedDesk = false;
@@ -63,9 +71,8 @@ function init(){
 }
 
 function fillScene(){
-    //Instanciation de la scene
+    //Instanciating the scene
     scene = new THREE.Scene();
-
     //Camera 
     scene.add(camera)
 
@@ -77,20 +84,28 @@ function fillScene(){
     ]);
     scene.background = skybox;
     
-    //Video mapped on right screen
+    //Video mapped on left screen
     createVideoTexture();
     
+    //Lights
     dirLight = new THREE.DirectionalLight(0xffffff, 2.2);
-    dirLight.castShadow = true;
 
+    //Shadow settings
+    dirLight.castShadow = true;
 	dirLight.shadow.mapSize.width = 2048;
 	dirLight.shadow.mapSize.height = 2048;
 	dirLight.shadow.camera.near = 0.5;
 	dirLight.shadow.camera.far = 500;
     dirLight.shadow.radius = 8.0;
-    dirLight.position.set(5,10,0);
+    dirLight.position.set(5 ,10 ,0);
 
     scene.add(dirLight);
+
+    dirLight2 = new THREE.DirectionalLight(0xffffff, 0.1);
+    dirLight2.position.set(5 ,10 , 5);
+    
+    scene.add(dirLight2);
+
     
     left_screen_content = new THREE.Mesh(
         new THREE.PlaneGeometry(1.4, 0.75),
@@ -161,66 +176,69 @@ function loadModels(){
         gltfLoader.load('desk.gltf', (desk) => {
 
         addGLTFToMeshes(desk, 0);
-
-        desk.scene.scale.set(0.1,0.1,0.1)
-        desk.scene.position.y += 2;
-
-        console.log(desk.scene.scale);
-
+        desk.scene.scale.set(gltfScale, gltfScale, gltfScale);
+        desk.scene.position.set(gltfBasicPos.x, gltfBasicPos.y, gltfBasicPos.z);
         scene.add(desk.scene);
 
         //Loading left screen's gltf model
         gltfLoader.load('screen1mesh.gltf', (leftscreen) => {
 
             addGLTFToMeshes(leftscreen, 1);
-            leftscreen.scene.scale.set(0.1,0.1,0.1)
-            leftscreen.scene.position.y += 2;
+            leftscreen.scene.scale.set(gltfScale,gltfScale,gltfScale);
+            leftscreen.scene.position.set(gltfBasicPos.x, gltfBasicPos.y, gltfBasicPos.z);
             scene.add(leftscreen.scene);
 
             //Loading right screen's gltf model
             gltfLoader.load('screen2mesh.gltf', (rightscreen) => {
 
                 addGLTFToMeshes(rightscreen, 2);
-                rightscreen.scene.scale.set(0.1,0.1,0.1)
-                rightscreen.scene.position.y += 2;
+                rightscreen.scene.scale.set(gltfScale,gltfScale,gltfScale);
+                rightscreen.scene.position.set(gltfBasicPos.x, gltfBasicPos.y, gltfBasicPos.z);
                 scene.add(rightscreen.scene);
 
                 //Loading the notebook
                 gltfLoader.load('notebook.gltf', (notebook) => {
 
                     addGLTFToMeshes(notebook, 4);
-                    notebook.scene.scale.set(0.1,0.1,0.1)
-                    notebook.scene.position.y += 2;
+                    notebook.scene.scale.set(gltfScale,gltfScale,gltfScale);
+                    notebook.scene.position.set(notebookPos.x, notebookPos.y, notebookPos.z);
                     notebook.scene.rotation.y = -90*Math.PI/180;
-                    notebook.scene.position.x += 0.1;
+                    
                     scene.add(notebook.scene);
                     
                     gltfLoader.load('phone.gltf', (phone) => {
 
                         addGLTFToMeshes(phone, 3);
-                        phone.scene.scale.set(0.1,0.1,0.1)
-                        phone.scene.position.y = 3.95;
+                        phone.scene.scale.set(gltfScale,gltfScale,gltfScale);
+                        phone.scene.position.set(phonePos.x, phonePos.y, phonePos.z);
                         phone.scene.rotation.y = 90*Math.PI/180;
-                        phone.scene.position.x += 1.2;
                         scene.add(phone.scene);
 
                         gltfLoader.load('poedesk.gltf', (poe) => {
 
                             addGLTFToMeshes(poe, 5);
-                            poe.scene.scale.set(0.1,0.1,0.1)
-                            poe.scene.position.y = 2;
+                            poe.scene.scale.set(gltfScale,gltfScale,gltfScale);
+                            poe.scene.position.set(gltfBasicPos.x, gltfBasicPos.y, gltfBasicPos.z);
                             poe.scene.rotation.y = 180 * Math.PI/180;
                             scene.add(poe.scene);
                                 
-                            //Animating the 6 elements at the same time
-                            //Smooth rotation
-                            gsap.to(desk.scene.rotation, {y: 4.8, duration: 1})
-                            gsap.to(leftscreen.scene.rotation, {y: 4.8, duration: 1})
-                            gsap.to(rightscreen.scene.rotation, {y: 4.8, duration: 1})
-                            gsap.to(notebook.scene.rotation, {y: 4.8, duration: 1})
-                            gsap.to(phone.scene.rotation, {y: 4.8, duration: 1})
-                            gsap.to(poe.scene.rotation, {y: 4.8, duration: 1})
-            
+                            gltfLoader.load('plant3.gltf', (plant) => {
+
+                                addGLTFToMeshes(plant, 6);
+                                plant.scene.scale.set(gltfScale*2, gltfScale*2, gltfScale*2);
+                                plant.scene.position.set(plantPos.x, plantPos.y, plantPos.z);
+                                scene.add(plant.scene);
+
+                                //Animating the 6 elements at the same time
+                                //Smooth rotation
+                                gsap.to(desk.scene.rotation, {y: 4.8, duration: 1})
+                                gsap.to(leftscreen.scene.rotation, {y: 4.8, duration: 1})
+                                gsap.to(rightscreen.scene.rotation, {y: 4.8, duration: 1})
+                                gsap.to(notebook.scene.rotation, {y: 4.8, duration: 1})
+                                gsap.to(phone.scene.rotation, {y: 4.8, duration: 1})
+                                gsap.to(poe.scene.rotation, {y: 4.8, duration: 1})
+                                gsap.to(plant.scene.rotation, {y: 4.8, duration: 1})
+                            })
                         }) //Poe end
                     }) //Phone end 
                 }) //Notebook end 
@@ -286,6 +304,7 @@ function cameraIntialPosition(){
 
 /**
  * Everytime that the pointer moves, we check if it's on a object
+ * If it is, we start its animation
  * @param {Pointer moving event} event 
  */
 function onPointerMove( event ) {
@@ -317,7 +336,7 @@ function onPointerMove( event ) {
         else if (!zoomedScreenRight) hoverZtranslate(2, 0.0);
 
          /** Phone hover effect */
-         if ( intersectsMove[0].object.userData.id == 3 && !zoomedPhone) hoverYtranslate(3, 0.15);
+         if ( intersectsMove[0].object.userData.id == 3 && !zoomedPhone) hoverYtranslate(3, 0.05);
          else if (!zoomedPhone) hoverYtranslate(3, 0.0);
 
         /** Notebook hover effect */
@@ -471,7 +490,6 @@ backButton.addEventListener('click', (e) => {
     }
 })
 
-
 /** Sizes */
 const sizes = {
     width: window.innerWidth,
@@ -509,8 +527,25 @@ const animate = () =>
 	}
     let angle = factor*2*Math.PI/180
     factor += 0.05;
-    dirLight.position.set(Math.cos(angle)*8,10,Math.sin(angle)*8);
+    dirLight.position.set(Math.cos(angle)*8,10, Math.abs(Math.sin(angle)*8) );
 
+    //animate leaves
+    sceneMeshes.forEach(mesh  => {
+        if (mesh.name.startsWith("Plant001")) {
+            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: -10*Math.PI/180, duration: 5});
+            else if (mesh.rotation.y <= -10 * Math.PI/180) gsap.to(mesh.rotation, {y: 0, duration: 5});
+        }
+        if (mesh.name.startsWith("Plant002")) {
+            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: -10*Math.PI/180, duration: 10});
+            else if (mesh.rotation.y <= -10*Math.PI/180) gsap.to(mesh.rotation, {y: 0, duration: 10});
+        }
+        if (mesh.name.startsWith("Plant000")) {
+            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: 10*Math.PI/180, duration: 15});
+            else if (mesh.rotation.y >= 10 * Math.PI/180) gsap.to(mesh.rotation, {y: 0, duration: 15});
+        }
+    });
+
+   
     render();
     window.requestAnimationFrame(animate)
 }

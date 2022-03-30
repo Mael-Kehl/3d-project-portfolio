@@ -4,7 +4,10 @@ const MiniCSSExtractPlugin = require('mini-css-extract-plugin')
 const path = require('path')
 
 module.exports = {
-    entry: path.resolve(__dirname, '../src/script.js'),
+    entry: {
+        main: path.resolve(__dirname, '../src/script.js'),
+        menu: path.resolve(__dirname, '../src/animations.js')
+    },
     output:
     {
         filename: 'bundle.[contenthash].js',
@@ -30,7 +33,9 @@ module.exports = {
             chunks: ['menu'],
             minify: true
         }),
-        new MiniCSSExtractPlugin()
+        new MiniCSSExtractPlugin({
+            filename: 'style.[contenthash].css',
+        })
     ],
     module:
     {
