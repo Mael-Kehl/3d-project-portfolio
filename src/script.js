@@ -38,6 +38,12 @@ const rightScreenID = 2;
 const phoneID = 3;
 const notebookID = 4;
 const pilotID = 5;
+const plantID = 6;
+
+//Leaf animations duration
+let leaf1Duration = 5;
+let leaf2Duration = 10;
+let leaf3Duration = 15;
 
 //Screen textures positions
 const screenLeftPos = new THREE.Vector3(-0.77, 4.635, -0.65);
@@ -78,7 +84,7 @@ let video2, video2Image, video2ImageContext, video2Texture;
 let left_screen_content, right_screen_content, dirLight, dirLight2;
 let factor;
 
-let zoomedScreenLeft = false ,zoomedScreenRight = false, zoomedPilot = false, zoomedPhone = false, zoomedDesk = false;
+let zoomedScreenLeft = false ,zoomedScreenRight = false, zoomedPilot = false, zoomedPhone = false, plantDancing = false;
 
 
 function init(){
@@ -421,10 +427,12 @@ function onPointerMove( event ) {
             hoverZtranslate(notebookID, 0.0);
             gsap.to(text_resume, {visible: false, duration: 0.1});
         }
-
         //Rebel pilot hover effect
         if ( intersectsMove[0].object.userData.id == pilotID ) hoverZtranslate(pilotID, -0.1);
         else hoverZtranslate(pilotID, 0.0);
+
+        if (intersectsMove[0].object.userData.id == plantID ) hoverYtranslate(plantID, 0.2);
+        else hoverYtranslate(plantID, 0.0);
         
     }
 }
@@ -524,6 +532,16 @@ function onDocumentMouseDown( event ) {
                 backButton.style.display = "none";
             }
         }
+        else if (intersects[0].object.userData.id == plantID) {
+            if (!plantDancing) {
+                hoverYtranslate(plantID, 0.0);
+                plantDancing = true;
+            }
+            else {
+                hoverYtranslate(plantID, 0.0);
+                plantDancing = false;
+            }
+        }
         //Debug : console.log(intersects)
     }
 }
@@ -539,7 +557,6 @@ function download() {
 }
 
 startButton.addEventListener('click', (e) => {
-    zoomedDesk = true;
     cameraIntialPosition();
     startButton.style.display = "none";
     hoverGuide.style.display = "block";
@@ -622,19 +639,18 @@ const animate = () =>
     //animate leaves
     sceneMeshes.forEach(mesh  => {
         if (mesh.name.startsWith("Plant001")) {
-            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: -leavesRota, duration: 5});
-            else if (mesh.rotation.y <= -leavesRota) gsap.to(mesh.rotation, {y: 0, duration: 5});
+            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: -leavesRota, duration: plantDancing ? 1 : 5});
+            else if (mesh.rotation.y <= -leavesRota) gsap.to(mesh.rotation, {y: 0, duration: plantDancing ? 1 : 5});
         }
         if (mesh.name.startsWith("Plant002")) {
-            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: -leavesRota, duration: 10});
-            else if (mesh.rotation.y <= -leavesRota) gsap.to(mesh.rotation, {y: 0, duration: 10});
+            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: -leavesRota, duration: plantDancing ? 1 : 10});
+            else if (mesh.rotation.y <= -leavesRota) gsap.to(mesh.rotation, {y: 0, duration: plantDancing ? 1 : 10});
         }
         if (mesh.name.startsWith("Plant000")) {
-            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: leavesRota, duration: 15});
-            else if (mesh.rotation.y >= leavesRota) gsap.to(mesh.rotation, {y: 0, duration: 15});
+            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: leavesRota, duration: plantDancing ? 1 : 10});
+            else if (mesh.rotation.y >= leavesRota) gsap.to(mesh.rotation, {y: 0, duration: plantDancing ? 1 : 10});
         }
     });
-
    
     render();
     window.requestAnimationFrame(animate)
