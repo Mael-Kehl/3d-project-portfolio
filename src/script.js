@@ -28,22 +28,43 @@ const gltfBasicPos = new THREE.Vector3(0,2,0);
 const plantPos = new THREE.Vector3(-2.2, 3.75,-0.5);
 const notebookPos = new THREE.Vector3(0.1, 2, 0);
 const phonePos = new THREE.Vector3(1.2, 3.95, 0);
-
 const textResPos = new THREE.Vector3(-2.2, 4.1, 0.1);
-const textSWPos = new THREE.Vector3();
-
+const textSWPos = new THREE.Vector3(2.7, 4.7, - 1.4);
 const gltfScale = 0.1;
+
+//Ids of elements 
+const leftScreenID = 1;
+const rightScreenID = 2;
+const phoneID = 3;
+const notebookID = 4;
+const pilotID = 5;
 
 //Screen textures positions
 const screenLeftPos = new THREE.Vector3(-0.77, 4.635, -0.65);
 const screenRightPos = new THREE.Vector3(0.775, 4.635, -0.78);
+const screenContHovPosY = 4.69;
 //Screen PlaneGeometry dimensions
 const screenDim = new THREE.Vector2(1.4, 0.75);
+
+//Positions when the camera is zooming 
+const camZoomScreenLPos = new THREE.Vector3(-0.5, 4.63, -0.15);
+const camZoomScreenLRot = new THREE.Vector3(0, 0.3, 0);
+const camZoomScreenRPos = new THREE.Vector3(0.65, 4.63, -0.25);
+const camZoomScreenRRot = new THREE.Vector3(0, -0.15, 0);
+const camZoomPhonePos = new THREE.Vector3(1.25, 10.12, 0.3);
+const phoneZoomPosY = 60;
+const camZoomPilotPos = new THREE.Vector3(2.2, 4.4, -0.1);
+const camZoomPilotRotY = -0.4;
+const leavesRota = 10*Math.PI/180;
+const textScale = new THREE.Vector3(0.07, 0.07, 0.02);
+const textRotY = 35*Math.PI/180;
 
 //texture loading
 const contactTex = new THREE.TextureLoader().load('contact.png'); 
 const textMaterial = new THREE.MeshBasicMaterial({color: 0x00A2FF});
 
+//Dimensions of video textures
+const videosDimX = 1280, videosDimY = 720;
 // Scene
 let camera, renderer, scene, raycasterClick, raycasterMove, text_resume, text_SW;
 //All meshes in the scene
@@ -154,10 +175,11 @@ function fillScene(){
             size: 1,
             height: 1 
         })
+        
         text_resume = new THREE.Mesh(geometry1, textMaterial)
-        text_resume.scale.set(0.07,0.07,0.02);
+        text_resume.scale.set(textScale.x , textScale.y , textScale.z );
         text_resume.position.set(textResPos.x, textResPos.y, textResPos.z);
-        text_resume.rotation.y = 35 * Math.PI/180;
+        text_resume.rotation.y = textRotY;
     
         scene.add(text_resume);
         text_resume.visible = false;
@@ -168,9 +190,9 @@ function fillScene(){
             height: 1 
         })
         text_SW = new THREE.Mesh(geometry2, textMaterial)
-        text_SW.scale.set(0.07,0.07,0.02);
-        text_SW.position.set( 2.7, 4.7, - 1.4);
-        text_SW.rotation.y = - 35 * Math.PI/180;
+        text_SW.scale.set(textScale.x , textScale.y , textScale.z );
+        text_SW.position.set( textSWPos.x, textSWPos.y, textSWPos.z );
+        text_SW.rotation.y = - textRotY;
     
         scene.add(text_SW);
         text_SW.visible = false;
@@ -184,8 +206,8 @@ function createVideo1Texture(){
 	video1.loop=true;
 
 	video1Image = document.createElement('canvas');
-	video1Image.width = 1280;
-	video1Image.height = 720;
+	video1Image.width = videosDimX;
+	video1Image.height = videosDimY;
 	
 	video1ImageContext = video1Image.getContext('2d');
 	video1ImageContext.fillRect(0,0, video1Image.width, video1Image.height);
@@ -200,7 +222,7 @@ function createVideo2Texture(){
 	video2.loop=true;
 
 	video2Image = document.createElement('canvas');
-	video2Image.width = 1280;
+	video2Image.width = videosDimX;
 	video2Image.height = 720;
 	
 	video2ImageContext = video2Image.getContext('2d');
@@ -367,42 +389,42 @@ function onPointerMove( event ) {
     if (intersectsMove.length > 0) {
         
         /** Left screen hover effect */
-        if ( intersectsMove[0].object.userData.id == 1 && !zoomedScreenLeft){
-            hoverZtranslate(1, 0.05);
-            gsap.to(left_screen_content.position, {y: 4.69, duration: 0.5})
+        if ( intersectsMove[0].object.userData.id == leftScreenID && !zoomedScreenLeft){
+            hoverZtranslate(leftScreenID, 0.05);
+            gsap.to(left_screen_content.position, {y: screenContHovPosY, duration: 0.5})
         } 
         else if (!zoomedScreenLeft) {
-            hoverZtranslate(1, 0.0);
-            gsap.to(left_screen_content.position, {y: 4.635, duration: 0.5})
+            hoverZtranslate(leftScreenID, 0.0);
+            gsap.to(left_screen_content.position, {y: screenLeftPos.y, duration: 0.5})
 
         }
         /** Right screen hover effect */
-        if ( intersectsMove[0].object.userData.id == 2 && !zoomedScreenRight ){
-            hoverZtranslate(2, 0.05);
-            gsap.to(right_screen_content.position, {y: 4.69, duration: 0.5})
+        if ( intersectsMove[0].object.userData.id == rightScreenID && !zoomedScreenRight ){
+            hoverZtranslate(rightScreenID, 0.05);
+            gsap.to(right_screen_content.position, {y: screenContHovPosY, duration: 0.5})
         }
         else if (!zoomedScreenRight){
-            hoverZtranslate(2, 0.0);
-            gsap.to(right_screen_content.position, {y: 4.635, duration: 0.5})
+            hoverZtranslate(rightScreenID, 0.0);
+            gsap.to(right_screen_content.position, {y: screenLeftPos.y, duration: 0.5})
         }
 
          /** Phone hover effect */
-         if ( intersectsMove[0].object.userData.id == 3 && !zoomedPhone) hoverYtranslate(3, 0.05);
-         else if (!zoomedPhone) hoverYtranslate(3, 0.0);
+         if ( intersectsMove[0].object.userData.id == phoneID && !zoomedPhone) hoverYtranslate(phoneID, 0.25);
+         else if (!zoomedPhone) hoverYtranslate(phoneID, 0.0);
 
         /** Notebook hover effect */
-        if ( intersectsMove[0].object.userData.id == 4) {
-            hoverZtranslate(4, 0.05);
+        if ( intersectsMove[0].object.userData.id == notebookID) {
+            hoverZtranslate(notebookID, 0.05);
             gsap.to(text_resume, {visible: true, duration: 0.5});
         }
         else{
-            hoverZtranslate(4, 0.0);
+            hoverZtranslate(notebookID, 0.0);
             gsap.to(text_resume, {visible: false, duration: 0.1});
         }
 
         //Rebel pilot hover effect
-        if ( intersectsMove[0].object.userData.id == 5 ) hoverZtranslate(5, -0.1);
-        else hoverZtranslate(5, 0.0);
+        if ( intersectsMove[0].object.userData.id == pilotID ) hoverZtranslate(pilotID, -0.1);
+        else hoverZtranslate(pilotID, 0.0);
         
     }
 }
@@ -419,15 +441,13 @@ function onDocumentMouseDown( event ) {
         backButton.style.display = "block";
         hoverGuide.style.display = "none";
 
-
-
-        if (intersects[0].object.userData.id == 1) { //Left screen
+        if (intersects[0].object.userData.id == leftScreenID) { //Left screen
             //If it isn't zoomed, then we zoom in
             if (!zoomedScreenLeft) {
-                gsap.to(camera.position, {z: -0.15,y: 4.63,x:-0.5, duration: 1});
-                gsap.to(camera.rotation, {x: 0, y:0.3, duration: 1});
-                hoverZtranslate(1 , 0.0);
-                gsap.to(left_screen_content.position, {y: 4.635, duration: 0.5})
+                gsap.to(camera.position, {x: camZoomScreenLPos.x, y:camZoomScreenLPos.y, z:camZoomScreenLPos.z, duration: 1});
+                gsap.to(camera.rotation, {x: camZoomScreenLRot.x, y:camZoomScreenLRot.y, duration: 1});
+                hoverZtranslate(leftScreenID , 0.0);
+                gsap.to(left_screen_content.position, {y: screenLeftPos.y, duration: 0.5})
                 zoomedScreenLeft = true;
             }
             //If we already zoomed in, we zoom out
@@ -436,14 +456,13 @@ function onDocumentMouseDown( event ) {
                 zoomedScreenLeft = false;
             }
         }
-        else if (intersects[0].object.userData.id == 2) { //Right screen
+        else if (intersects[0].object.userData.id == rightScreenID) { //Right screen
             if (!zoomedScreenRight) {
-
                 // puting the object back to its initial position
-                hoverZtranslate(2 , 0.0);
-                gsap.to(right_screen_content.position, {y: 4.635, duration: 0.5})
-                gsap.to(camera.position, {z: -0.25,y: 4.63,x:0.65, duration: 1});
-                gsap.to(camera.rotation, {x: 0, y:-0.15, duration: 1});
+                hoverZtranslate(rightScreenID , 0.0);
+                gsap.to(right_screen_content.position, {y: screenRightPos.y, duration: 0.5})
+                gsap.to(camera.position, {z: camZoomScreenRPos.z ,y: camZoomScreenRPos.y ,x: camZoomScreenRPos.x, duration: 1});
+                gsap.to(camera.rotation, {x: camZoomScreenRRot.x, y:camZoomScreenRRot.y, duration: 1});
                 
                 zoomedScreenRight = true;
             }
@@ -453,15 +472,14 @@ function onDocumentMouseDown( event ) {
                 zoomedScreenRight = false;
             }
         }
-        else if (intersects[0].object.userData.id == 3) { //Phone
+        else if (intersects[0].object.userData.id == phoneID) { //Phone
             if (!zoomedPhone) {
-                hoverYtranslate(3, 0.0)
-
+                hoverYtranslate(phoneID, 0.0)
                 sceneMeshes.forEach(mesh => {
-                    if (mesh.userData.id == 3) {
-                        gsap.to(mesh.position, {y: 60, duration: 1});
-                        gsap.to(mesh.rotation, {z: -90*Math.PI/180, y: Math.PI, duration: 1}); //panim
-                        gsap.to(camera.position, {z: 0.3,y: 10.12,x:1.25, duration: 1});
+                    if (mesh.userData.id == phoneID) {
+                        gsap.to(mesh.position, {y: phoneZoomPosY, duration: 1});
+                        gsap.to(mesh.rotation, {z: -Math.PI/2, y: Math.PI, duration: 1}); //panim
+                        gsap.to(camera.position, {z: camZoomPhonePos.z ,y: camZoomPhonePos.y ,x: camZoomPhonePos.x, duration: 1});
                         gsap.to(camera.rotation, {x: initCameraRota.x , y: initCameraRota.y , duration: 1});
                     }
                     //We replace the phone's screen texture by a png loaded before
@@ -475,23 +493,23 @@ function onDocumentMouseDown( event ) {
             }
             else{
                 sceneMeshes.forEach(mesh => {
-                    if (mesh.userData.id == 3) {
+                    if (mesh.userData.id == phoneID) {
                         gsap.to(mesh.rotation, {z: Math.PI, y: -Math.PI, duration: 1});
-                        gsap.to(mesh.position, {y: 0, duration: 1});
+                        gsap.to(mesh.position, {y: phonePos.y, duration: 1});
                         cameraIntialPosition();
                     }
                 });
                 zoomedPhone = false;
             }
         }
-        else if (intersects[0].object.userData.id == 4){ //Notebook
+        else if (intersects[0].object.userData.id == notebookID){ //Notebook
             download();
         }
-        else if (intersects[0].object.userData.id == 5){ //Pilot
+        else if (intersects[0].object.userData.id == pilotID){ //Pilot
             if (!zoomedPilot) {
-                hoverZtranslate(5 , 0.0);
-                gsap.to(camera.position, {z: -0.1,y: 4.4,x:2.2, duration: 1});
-                gsap.to(camera.rotation, {y: -0.4, x:0, duration: 1});
+                hoverZtranslate(pilotID , 0.0);
+                gsap.to(camera.position, {z: camZoomPilotPos.z ,y: camZoomPilotPos.y ,x: camZoomPilotPos.x , duration: 1});
+                gsap.to(camera.rotation, {y: camZoomPilotRotY, x:0, duration: 1});
                 gsap.to(text_SW, {visible: true, duration: 0.5});
                 zoomedPilot = true;
             }
@@ -597,16 +615,16 @@ const animate = () =>
     //animate leaves
     sceneMeshes.forEach(mesh  => {
         if (mesh.name.startsWith("Plant001")) {
-            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: -10*Math.PI/180, duration: 5});
-            else if (mesh.rotation.y <= -10 * Math.PI/180) gsap.to(mesh.rotation, {y: 0, duration: 5});
+            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: -leavesRota, duration: 5});
+            else if (mesh.rotation.y <= -leavesRota) gsap.to(mesh.rotation, {y: 0, duration: 5});
         }
         if (mesh.name.startsWith("Plant002")) {
-            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: -10*Math.PI/180, duration: 10});
-            else if (mesh.rotation.y <= -10*Math.PI/180) gsap.to(mesh.rotation, {y: 0, duration: 10});
+            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: -leavesRota, duration: 10});
+            else if (mesh.rotation.y <= -leavesRota) gsap.to(mesh.rotation, {y: 0, duration: 10});
         }
         if (mesh.name.startsWith("Plant000")) {
-            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: 10*Math.PI/180, duration: 15});
-            else if (mesh.rotation.y >= 10 * Math.PI/180) gsap.to(mesh.rotation, {y: 0, duration: 15});
+            if (mesh.rotation.y == 0) gsap.to(mesh.rotation, {y: leavesRota, duration: 15});
+            else if (mesh.rotation.y >= leavesRota) gsap.to(mesh.rotation, {y: 0, duration: 15});
         }
     });
 
