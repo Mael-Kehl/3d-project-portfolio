@@ -9,6 +9,8 @@ import gsap from 'gsap'
 const canvas = document.querySelector('canvas.webgl');
 const startButton = document.getElementById("next");
 const backButton = document.getElementById("back");
+const hoverGuide = document.getElementById("hover-guide");
+
 
 // Loaders
 const gltfLoader = new GLTFLoader();
@@ -27,16 +29,32 @@ const plantPos = new THREE.Vector3(-2.2, 3.75,-0.5);
 const notebookPos = new THREE.Vector3(0.1, 2, 0);
 const phonePos = new THREE.Vector3(1.2, 3.95, 0);
 
+const textResPos = new THREE.Vector3(-2.2, 4.1, 0.1);
+const textSWPos = new THREE.Vector3();
+
 const gltfScale = 0.1;
+
+//Screen textures positions
+const screenLeftPos = new THREE.Vector3(-0.77, 4.635, -0.65);
+const screenRightPos = new THREE.Vector3(0.775, 4.635, -0.78);
+//Screen PlaneGeometry dimensions
+const screenDim = new THREE.Vector2(1.4, 0.75);
+
+//texture loading
+const contactTex = new THREE.TextureLoader().load('contact.png'); 
+const textMaterial = new THREE.MeshBasicMaterial({color: 0x00A2FF});
 
 // Scene
 let camera, renderer, scene, raycasterClick, raycasterMove, text_resume, text_SW;
 //All meshes in the scene
 var sceneMeshes = [];
+//All variables needed to load the left screen videoTexture
+let video1, video1Image, video1ImageContext, video1Texture;
 //All variables needed to load the right screen videoTexture
-let video, videoImage, videoImageContext, videoTexture;
+let video2, video2Image, video2ImageContext, video2Texture;
+
 //element of the scene that (modified in animate())
-let left_screen_content, dirLight, dirLight2;
+let left_screen_content, right_screen_content, dirLight, dirLight2;
 let factor;
 
 let zoomedScreenLeft = false ,zoomedScreenRight = false, zoomedPilot = false, zoomedPhone = false, zoomedDesk = false;
@@ -84,9 +102,6 @@ function fillScene(){
     ]);
     scene.background = skybox;
     
-    //Video mapped on left screen
-    createVideoTexture();
-    
     //Lights
     dirLight = new THREE.DirectionalLight(0xffffff, 2.2);
 
@@ -106,15 +121,28 @@ function fillScene(){
     
     scene.add(dirLight2);
 
-    
+    //Video mapped on left screen
+    createVideo1Texture();
+
     left_screen_content = new THREE.Mesh(
-        new THREE.PlaneGeometry(1.4, 0.75),
-        new THREE.MeshBasicMaterial({map: videoTexture})
+        new THREE.PlaneGeometry(screenDim.x, screenDim.y),
+        new THREE.MeshBasicMaterial({map: video1Texture})
     )
-    left_screen_content.position.set(-0.77, 4.635, -0.63);
+    left_screen_content.position.set(screenLeftPos.x, screenLeftPos.y, screenLeftPos.z);
     left_screen_content.rotation.y = 18 * Math.PI/180;
     left_screen_content.visible = false;
     scene.add(left_screen_content);
+
+    createVideo2Texture();
+
+    right_screen_content = new THREE.Mesh(
+        new THREE.PlaneGeometry(screenDim.x, screenDim.y),
+        new THREE.MeshBasicMaterial({map: video2Texture})
+    )
+    right_screen_content.position.set(screenRightPos.x, screenRightPos.y, screenRightPos.z);
+    right_screen_content.rotation.y = -8 * Math.PI/180;
+    right_screen_content.visible = false;
+    scene.add(right_screen_content);
     
     loadModels();
 
@@ -126,9 +154,9 @@ function fillScene(){
             size: 1,
             height: 1 
         })
-        text_resume = new THREE.Mesh(geometry1, new THREE.MeshBasicMaterial({color: 0xCCCCCC}))
+        text_resume = new THREE.Mesh(geometry1, textMaterial)
         text_resume.scale.set(0.07,0.07,0.02);
-        text_resume.position.set(-2.2, 4.1, 0.1);
+        text_resume.position.set(textResPos.x, textResPos.y, textResPos.z);
         text_resume.rotation.y = 35 * Math.PI/180;
     
         scene.add(text_resume);
@@ -139,7 +167,7 @@ function fillScene(){
             size: 1,
             height: 1 
         })
-        text_SW = new THREE.Mesh(geometry2, new THREE.MeshBasicMaterial({color: 0xCCCCCC}))
+        text_SW = new THREE.Mesh(geometry2, textMaterial)
         text_SW.scale.set(0.07,0.07,0.02);
         text_SW.position.set( 2.7, 4.7, - 1.4);
         text_SW.rotation.y = - 35 * Math.PI/180;
@@ -149,20 +177,36 @@ function fillScene(){
     });
 }
 
-function createVideoTexture(){
-    video = document.createElement('video');
-	video.src = "text.mp4"
-	video.load();
-	video.loop=true;
+function createVideo1Texture(){
+    video1 = document.createElement('video');
+	video1.src = "text.mp4"
+	video1.load();
+	video1.loop=true;
 
-	videoImage = document.createElement('canvas');
-	videoImage.width = 1280;
-	videoImage.height = 720;
+	video1Image = document.createElement('canvas');
+	video1Image.width = 1280;
+	video1Image.height = 720;
 	
-	videoImageContext = videoImage.getContext('2d');
-	videoImageContext.fillRect(0,0, videoImage.width, videoImage.height);
+	video1ImageContext = video1Image.getContext('2d');
+	video1ImageContext.fillRect(0,0, video1Image.width, video1Image.height);
 	
-	videoTexture = new THREE.Texture(videoImage);
+	video1Texture = new THREE.Texture(video1Image);
+}
+
+function createVideo2Texture(){
+    video2 = document.createElement('video');
+	video2.src = "projects.mp4"
+	video2.load();
+	video2.loop=true;
+
+	video2Image = document.createElement('canvas');
+	video2Image.width = 1280;
+	video2Image.height = 720;
+	
+	video2ImageContext = video2Image.getContext('2d');
+	video2ImageContext.fillRect(0,0, video2Image.width, video2Image.height);
+	
+	video2Texture = new THREE.Texture(video2Image);
 }
 
 /**
@@ -238,6 +282,7 @@ function loadModels(){
                                 gsap.to(phone.scene.rotation, {y: 4.8, duration: 1})
                                 gsap.to(poe.scene.rotation, {y: 4.8, duration: 1})
                                 gsap.to(plant.scene.rotation, {y: 4.8, duration: 1})
+
                             })
                         }) //Poe end
                     }) //Phone end 
@@ -328,12 +373,18 @@ function onPointerMove( event ) {
         } 
         else if (!zoomedScreenLeft) {
             hoverZtranslate(1, 0.0);
-            gsap.to(left_screen_content.position, {y: 4.64, duration: 0.5})
+            gsap.to(left_screen_content.position, {y: 4.635, duration: 0.5})
 
         }
         /** Right screen hover effect */
-        if ( intersectsMove[0].object.userData.id == 2 && !zoomedScreenRight ) hoverZtranslate(2, 0.05);
-        else if (!zoomedScreenRight) hoverZtranslate(2, 0.0);
+        if ( intersectsMove[0].object.userData.id == 2 && !zoomedScreenRight ){
+            hoverZtranslate(2, 0.05);
+            gsap.to(right_screen_content.position, {y: 4.69, duration: 0.5})
+        }
+        else if (!zoomedScreenRight){
+            hoverZtranslate(2, 0.0);
+            gsap.to(right_screen_content.position, {y: 4.635, duration: 0.5})
+        }
 
          /** Phone hover effect */
          if ( intersectsMove[0].object.userData.id == 3 && !zoomedPhone) hoverYtranslate(3, 0.05);
@@ -365,6 +416,10 @@ function onDocumentMouseDown( event ) {
     const intersects = raycasterClick.intersectObjects( sceneMeshes );
 
     if (intersects.length > 0) {
+        backButton.style.display = "block";
+        hoverGuide.style.display = "none";
+
+
 
         if (intersects[0].object.userData.id == 1) { //Left screen
             //If it isn't zoomed, then we zoom in
@@ -372,7 +427,7 @@ function onDocumentMouseDown( event ) {
                 gsap.to(camera.position, {z: -0.15,y: 4.63,x:-0.5, duration: 1});
                 gsap.to(camera.rotation, {x: 0, y:0.3, duration: 1});
                 hoverZtranslate(1 , 0.0);
-                gsap.to(left_screen_content.position, {y: 4.64, duration: 0.5})
+                gsap.to(left_screen_content.position, {y: 4.635, duration: 0.5})
                 zoomedScreenLeft = true;
             }
             //If we already zoomed in, we zoom out
@@ -386,6 +441,7 @@ function onDocumentMouseDown( event ) {
 
                 // puting the object back to its initial position
                 hoverZtranslate(2 , 0.0);
+                gsap.to(right_screen_content.position, {y: 4.635, duration: 0.5})
                 gsap.to(camera.position, {z: -0.25,y: 4.63,x:0.65, duration: 1});
                 gsap.to(camera.rotation, {x: 0, y:-0.15, duration: 1});
                 
@@ -411,7 +467,7 @@ function onDocumentMouseDown( event ) {
                     //We replace the phone's screen texture by a png loaded before
                     //We recognize it by it's name, we need to be sure that no other element has that name
                     if (mesh.name === "screen"){
-                        let texture = new THREE.TextureLoader().load('contact.png');                        
+                        let texture = contactTex;                       
                         mesh.material = new THREE.MeshBasicMaterial({map: texture});
                     }
                 });
@@ -462,10 +518,12 @@ function download() {
 startButton.addEventListener('click', (e) => {
     zoomedDesk = true;
     cameraIntialPosition();
-    backButton.style.display = "block";
     startButton.style.display = "none";
+    hoverGuide.style.display = "block";
     left_screen_content.visible = true;
-    video.play();
+    right_screen_content.visible = true;
+    video1.play();
+    video2.play();
 })
 
 backButton.addEventListener('click', (e) => {
@@ -518,11 +576,18 @@ window.addEventListener('resize', () =>
 const animate = () =>
 {
     // Video texture being updated
-    if( video.readyState === video.HAVE_ENOUGH_DATA)
+    if( video1.readyState === video1.HAVE_ENOUGH_DATA)
 	{
-		videoImageContext.drawImage(video, 0,0);
-		if (videoTexture) {
-			videoTexture.needsUpdate = true;
+		video1ImageContext.drawImage(video1, 0,0);
+		if (video1Texture) {
+			video1Texture.needsUpdate = true;
+		}
+	}
+    if( video2.readyState === video2.HAVE_ENOUGH_DATA)
+	{
+		video2ImageContext.drawImage(video2, 0,0);
+		if (video2Texture) {
+			video2Texture.needsUpdate = true;
 		}
 	}
     let angle = factor*2*Math.PI/180
@@ -558,7 +623,6 @@ function render(){
 
     renderer.render(scene, camera);
 }
-
 
 init();
 animate()

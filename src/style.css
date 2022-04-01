@@ -1,20 +1,25 @@
-*
-{
+:root{
+    --grey-color: #40474B;
+    --white-color: #F3F1E5;
+    --blue-color: #00A2FF;
+}
+
+*{
     margin: 0;
     padding: 0;
     text-decoration: none;
 }
 
 a{
-    color: #40474B;
+    color: var(--grey-color);
 }
 
 html,
 body
 {
     position: relative;
-    background: #F3F1E5;
-    color: #40474B;
+    background: var(--white-color);
+    color: var(--grey-color);
     height: 100vh;
     font-family: 'Inter', sans-serif;
 }
@@ -36,8 +41,9 @@ canvas{
     width: 95px;
     font-size: 20px;
     border-radius: 10px;
-    background: rgb(206, 171, 161);
-    border: 2px solid rgb(206, 171, 161);
+    background: var(--grey-color);
+    border: 2px solid var(--grey-color);
+    color: var(--white-color);
     z-index: 100;
 }
 
@@ -51,7 +57,14 @@ canvas{
     display: flex;
     justify-content: center;
     align-items: flex-end;
+}
 
+#hover-guide{
+    position: absolute;
+    top: 5%;
+    color: var(--white-color);
+    display: none;
+    text-decoration: wavy ;
 }
 
 .buttons-container{
@@ -87,7 +100,7 @@ section{
 }
 
 .blue-text{
-    color: #00A2FF;
+    color: var(--blue-color);
 }
 
 .menu{
@@ -95,6 +108,10 @@ section{
     width: 100vw;
     display: flex;
     justify-content: flex-end;
+}
+
+.menu>svg:hover{
+    cursor: pointer;
 }
 
 #menu-button{
@@ -164,7 +181,7 @@ section{
     height: 400px;
     width: 100%;
     border-radius: 5%;
-    border: solid 3px #40474B;
+    border: solid 3px var(--grey-color);
 }
 
 .carousel:hover{
@@ -230,8 +247,8 @@ section{
     font-weight: 700;
     font-size: 14px;
     letter-spacing: 0.05em;
-    background: #00A2FF;
-    border: 2px solid #00A2FF;
-    color: #F3F1E5;
+    background: var(--blue-color);
+    border: 2px solid var(--blue-color);
+    color: var(--white-color);
     z-index: 100;
 }
