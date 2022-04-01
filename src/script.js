@@ -438,9 +438,7 @@ function onDocumentMouseDown( event ) {
     const intersects = raycasterClick.intersectObjects( sceneMeshes );
 
     if (intersects.length > 0) {
-        backButton.style.display = "block";
         hoverGuide.style.display = "none";
-
         if (intersects[0].object.userData.id == leftScreenID) { //Left screen
             //If it isn't zoomed, then we zoom in
             if (!zoomedScreenLeft) {
@@ -449,11 +447,13 @@ function onDocumentMouseDown( event ) {
                 hoverZtranslate(leftScreenID , 0.0);
                 gsap.to(left_screen_content.position, {y: screenLeftPos.y, duration: 0.5})
                 zoomedScreenLeft = true;
+                backButton.style.display = "block";
             }
             //If we already zoomed in, we zoom out
             else{
                 cameraIntialPosition();
                 zoomedScreenLeft = false;
+                backButton.style.display = "none";
             }
         }
         else if (intersects[0].object.userData.id == rightScreenID) { //Right screen
@@ -463,13 +463,14 @@ function onDocumentMouseDown( event ) {
                 gsap.to(right_screen_content.position, {y: screenRightPos.y, duration: 0.5})
                 gsap.to(camera.position, {z: camZoomScreenRPos.z ,y: camZoomScreenRPos.y ,x: camZoomScreenRPos.x, duration: 1});
                 gsap.to(camera.rotation, {x: camZoomScreenRRot.x, y:camZoomScreenRRot.y, duration: 1});
-                
+                backButton.style.display = "block";
                 zoomedScreenRight = true;
             }
             //If we already zoomed in, we zoom out
             else {
                 cameraIntialPosition();
                 zoomedScreenRight = false;
+                backButton.style.display = "none";
             }
         }
         else if (intersects[0].object.userData.id == phoneID) { //Phone
@@ -490,6 +491,7 @@ function onDocumentMouseDown( event ) {
                     }
                 });
                 zoomedPhone = true;
+                backButton.style.display = "block";
             }
             else{
                 sceneMeshes.forEach(mesh => {
@@ -500,6 +502,7 @@ function onDocumentMouseDown( event ) {
                     }
                 });
                 zoomedPhone = false;
+                backButton.style.display = "none";
             }
         }
         else if (intersects[0].object.userData.id == notebookID){ //Notebook
@@ -512,11 +515,13 @@ function onDocumentMouseDown( event ) {
                 gsap.to(camera.rotation, {y: camZoomPilotRotY, x:0, duration: 1});
                 gsap.to(text_SW, {visible: true, duration: 0.5});
                 zoomedPilot = true;
+                backButton.style.display = "block";
             }
             else {
                 cameraIntialPosition();
                 gsap.to(text_SW, {visible: false, duration: 0.5});
                 zoomedPilot = false;
+                backButton.style.display = "none";
             }
         }
         //Debug : console.log(intersects)
@@ -564,6 +569,8 @@ backButton.addEventListener('click', (e) => {
     else if ( zoomedScreenLeft || zoomedScreenRight){
         cameraIntialPosition();
     }
+
+    backButton.style.display = "none";
 })
 
 /** Sizes */
