@@ -14,9 +14,7 @@ a{
     color: var(--grey-color);
 }
 
-html,
-body
-{
+html, body {
     position: relative;
     background: var(--white-color);
     color: var(--grey-color);
@@ -24,8 +22,7 @@ body
     font-family: 'Inter', sans-serif;
 }
 
-.webgl
-{
+.webgl {
     position: fixed;
     top: 0;
     left: 0;
@@ -81,7 +78,7 @@ canvas{
 }
 
 
-/* Menu Css */
+/* Css of the non-threejs page*/
 
 .container{
     height: 100vh;
@@ -105,12 +102,12 @@ section{
 
 .menu{
     height: 3vh;
-    width: 100vw;
+    width: 100%;
     display: flex;
     justify-content: flex-end;
 }
 
-.menu>svg:hover{
+#menu-bars:hover{
     cursor: pointer;
 }
 
@@ -199,8 +196,8 @@ section{
 .slide{
     min-height: 400px;
     max-height: 400px;
-    max-width: 79vw;
-    min-width: 79vw;
+    max-width: 100%;
+    min-width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
@@ -224,6 +221,10 @@ section{
     display: flex;
     justify-content: space-around;
     align-items: center;
+}
+
+#arrow-prev:hover, #arrow-next:hover{
+    cursor: pointer;
 }
 
 #swipe-instruction{
@@ -253,4 +254,86 @@ section{
     z-index: 100;
 }
 
-/*# sourceMappingURL=style.2a87736f6c0bd735cd10.css.map*/
+@media (min-width: 700px) {
+    
+    .menu{
+        justify-content: flex-end;
+    }
+
+    #menu-button{
+        width: 150px;
+    }
+
+    #menu-bars{
+        width: 40px;
+        height: 40px;
+    }
+
+    #dev-name{
+        font-size: 14px;
+    }
+
+    .page-title{
+        height: 65vh;
+        font-size: 64px;
+        line-height: 78px;
+    }
+
+    .container{
+        overflow: hidden;
+    }
+
+    .scroll-down{
+        width: 170px;
+        font-size: 16px;
+    }
+
+    #contact-title{
+        height: 50vh;
+        line-height: 72px;
+    }
+
+    .social-link{
+        width: 200px;
+    }
+
+    .social-name{
+        font-size: 20px;
+    }
+
+    .carousel{
+        overflow: visible;
+        width: 30%;
+        height: 500px;
+    }
+
+    .slide{
+        min-height: 450px;
+        max-height: 450px;
+    }
+
+    .find-out-more-button{
+        font-size: 16px;
+    }
+
+    .arrow-container{
+        width: 30%;
+    }
+
+    #swipe-instruction{
+        width: 30%;
+    }
+
+    .find-out-more-button:hover{
+        cursor: pointer;
+    }
+
+    #projects-central-elements{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+/*# sourceMappingURL=style.3b1ffab657a2c8861378.css.map*/
