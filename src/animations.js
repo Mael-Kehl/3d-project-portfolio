@@ -1,5 +1,6 @@
 import './style.css';
 
+const body = document.querySelector('.container');
 const slider = document.querySelector('.slider');
 const slides = Array.from(document.querySelectorAll('.slide'));
 const arrowNext = document.getElementById("arrow-next");
@@ -41,6 +42,8 @@ window.oncontextmenu = function(event) {
 
 function touchStart(index){
     return function(event){
+        body.classList.add('stop-scrolling');
+        body.classList.remove('scrolling');
         currentIndex = index;
         startPos = getPositionX(event);
         isDragging = true;
@@ -50,6 +53,8 @@ function touchStart(index){
 }
 
 function touchEnd(){
+    body.classList.remove('stop-scrolling');
+    body.classList.add('scrolling');
     isDragging = false;
     cancelAnimationFrame(animationID);
 
@@ -61,6 +66,13 @@ function touchEnd(){
     setPositionByIndex();
 
     slider.classList.remove('grabbing');
+}
+
+function touchMove(event){
+    if(isDragging){
+        const currentPos = getPositionX(event);
+        currentTranslate = prevTranslate + currentPos - startPos;
+    }
 }
 
 arrowNext.addEventListener('click', () => {
@@ -83,13 +95,6 @@ document.addEventListener('keydown', (e) => {
         setPositionByIndex();
     }
 });
-
-function touchMove(event){
-    if(isDragging){
-        const currentPos = getPositionX(event);
-        currentTranslate = prevTranslate + currentPos - startPos;
-    }
-}
 
 function getPositionX(event) {
     return event.type.includes('mouse') ? event.pageX : event.touches[0].pageX;

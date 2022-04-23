@@ -82,6 +82,14 @@ canvas{
 
 .container{
     height: 100vh;
+}
+
+.stop-scrolling {
+    overflow: hidden;
+    height: 100vh;
+}
+
+.scrolling {
     scroll-snap-type: y mandatory;
     overflow-y: scroll;
     scroll-behavior: smooth;
