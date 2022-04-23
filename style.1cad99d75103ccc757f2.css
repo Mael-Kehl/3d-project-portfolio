@@ -82,6 +82,14 @@ canvas{
 
 .container{
     height: 100vh;
+}
+
+.stop-scrolling {
+    overflow: hidden;
+    height: 100vh;
+}
+
+.scrolling {
     scroll-snap-type: y mandatory;
     overflow-y: scroll;
     scroll-behavior: smooth;
@@ -336,4 +344,4 @@ section{
     }
 }
 
-/*# sourceMappingURL=style.3b1ffab657a2c8861378.css.map*/
+/*# sourceMappingURL=style.1cad99d75103ccc757f2.css.map*/
