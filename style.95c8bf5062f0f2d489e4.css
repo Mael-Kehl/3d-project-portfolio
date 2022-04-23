@@ -19,7 +19,12 @@ html, body {
     background: var(--white-color);
     color: var(--grey-color);
     height: 100vh;
+    height: -webkit-fill-available;
     font-family: 'Inter', sans-serif;
+}
+
+body {
+    overflow: hidden;
 }
 
 .webgl {
@@ -82,21 +87,25 @@ canvas{
 
 .container{
     height: 100vh;
+    height: -webkit-fill-available;
+    
 }
 
 .stop-scrolling {
     overflow: hidden;
-    height: 100vh;
 }
 
 .scrolling {
     scroll-snap-type: y mandatory;
     overflow-y: scroll;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 
 section{
+    padding: 50px 0;
     height: 100vh;
+    height: -webkit-fill-available;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
@@ -344,4 +353,4 @@ section{
     }
 }
 
-/*# sourceMappingURL=style.1cad99d75103ccc757f2.css.map*/
+/*# sourceMappingURL=style.95c8bf5062f0f2d489e4.css.map*/
